@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<title>Horizontechland – Restaurant 5 étoiles</title>
+<style>
+  :root { --nuit:#0a2a66; --bleu:#1a5fd6; --clair:#e8f0fe; --texte:#14213d; --gris:#5b6b8c; --ligne:#cfd9ee; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:"Trebuchet MS","Segoe UI",Arial,sans-serif; color:var(--texte); min-height:100vh; display:flex; justify-content:center; align-items:flex-start; padding:20px;
+    background:linear-gradient(180deg,var(--nuit) 0%,var(--bleu) 60%,var(--clair) 100%); background-attachment:fixed; line-height:1.5; }
+  .carte { width:100%; max-width:440px; background:#fff; border-radius:16px; padding:30px 26px; box-shadow:0 12px 40px rgba(10,42,102,.35); margin:auto 0; }
+  .carte.large { max-width:920px; margin:0; }
+  .logo { text-align:center; margin-bottom:24px; }
+  .logo svg { width:60px; height:60px; }
+  .logo h1 { font-size:1.7rem; color:var(--nuit); margin-top:6px; }
+  .logo h1 span { color:var(--bleu); }
+  .logo p { color:var(--gris); font-size:.95rem; }
+  .menu { display:flex; flex-direction:column; gap:12px; }
+  .titre { display:flex; align-items:center; gap:14px; padding:16px 18px; border:2px solid var(--ligne); border-radius:12px; text-decoration:none; color:var(--nuit); font-size:1.1rem; font-weight:bold; transition:background .2s,color .2s; }
+  .num { flex:none; width:36px; height:36px; border-radius:50%; background:var(--bleu); color:#fff; display:flex; align-items:center; justify-content:center; }
+  .fl { margin-left:auto; font-size:1.3rem; }
+  .titre:hover,.titre:focus-visible { background:var(--nuit); color:#fff; outline:none; }
+  .titre:hover .num,.titre:focus-visible .num { background:#fff; color:var(--nuit); }
+  footer { text-align:center; color:var(--gris); font-size:.8rem; margin-top:22px; }
+  /* vues */
+  .retour { display:inline-block; color:var(--bleu); text-decoration:none; font-weight:bold; margin-bottom:14px; padding:6px 0; }
+  .retour:focus-visible { outline:3px solid var(--bleu); }
+  h2 { color:var(--nuit); font-size:1.45rem; border-bottom:3px solid var(--bleu); padding-bottom:6px; margin-bottom:14px; }
+  h3 { color:var(--nuit); font-size:1.05rem; margin:22px 0 8px; }
+  .note { font-size:.82rem; color:var(--gris); margin-top:10px; }
+  .cartes { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:10px; margin:10px 0; }
+  .c { background:var(--clair); border-left:4px solid var(--bleu); border-radius:6px; padding:12px 14px; font-size:.9rem; }
+  .c b { display:block; color:var(--nuit); margin-bottom:3px; }
+  .c ul { margin:6px 0 0 18px; }
+  .grand { font-size:1.6rem; color:var(--nuit); }
+  .tab { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:.9rem; }
+  th,td { padding:9px 12px; border-bottom:1px solid var(--ligne); text-align:left; }
+  th { background:var(--nuit); color:#fff; font-weight:normal; }
+  .n { text-align:right; white-space:nowrap; }
+  tfoot td { font-weight:bold; background:var(--clair); color:var(--nuit); }
+  .barre { background:#eef1f6; height:12px; border-radius:6px; min-width:90px; }
+  .barre i { display:block; height:100%; background:var(--bleu); border-radius:6px; }
+  .calc { background:var(--clair); border-radius:8px; padding:14px; margin-bottom:12px; }
+  .champs { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; }
+  .calc label { font-size:.82rem; color:var(--gris); display:flex; flex-direction:column; gap:4px; }
+  .calc input { padding:8px; border:2px solid var(--ligne); border-radius:6px; font-size:1rem; width:100%; color:var(--texte); }
+  .calc input:focus-visible { outline:3px solid var(--bleu); }
+  .res { margin-top:10px; } .res strong { color:var(--nuit); font-size:1.25rem; }
+  .chaine { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:6px 0 12px; font-size:.85rem; }
+  .pas { background:var(--bleu); color:#fff; padding:6px 12px; border-radius:16px; }
+  .pas.p { background:var(--nuit); }
+  .gl { display:grid; grid-template-columns:minmax(130px,230px) 1fr; gap:10px; align-items:center; padding:5px 0; font-size:.85rem; }
+  .piste { position:relative; height:18px; background:#eef1f6; border-radius:9px; }
+  .piste i { position:absolute; top:0; height:100%; background:var(--nuit); border-radius:9px; min-width:6px; }
+  .piste i.k { background:var(--bleu); }
+  .gl small { display:block; color:var(--gris); }
+
+  /* connexion */
+  .carte h2.petit { font-size:1.2rem; border:none; padding:0; margin-bottom:6px; }
+  .formulaire label { display:block; font-size:.9rem; font-weight:bold; margin:14px 0 6px; }
+  .formulaire input[type=text],.formulaire input[type=password] { width:100%; padding:12px 14px; border:2px solid var(--ligne); border-radius:10px; font-size:1rem; color:var(--texte); background:#fff; }
+  .formulaire input:focus { outline:none; border-color:var(--bleu); box-shadow:0 0 0 3px rgba(26,95,214,.2); }
+  .mdp { position:relative; }
+  .mdp input { padding-right:90px !important; }
+  .voir { position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--bleu); font-size:.85rem; font-weight:bold; cursor:pointer; padding:6px; }
+  .formulaire label.cochet { display:flex; align-items:center; gap:8px; font-weight:normal; margin-top:14px; }
+  .btn { width:100%; margin-top:20px; padding:13px; border:none; border-radius:10px; background:var(--bleu); color:#fff; font-size:1rem; font-weight:bold; cursor:pointer; }
+  .btn:hover { background:var(--nuit); }
+  .btn:focus-visible,.lien:focus-visible,.voir:focus-visible { outline:3px solid var(--nuit); outline-offset:2px; }
+  .lien { display:block; text-align:center; margin-top:14px; color:var(--bleu); font-size:.92rem; background:none; border:none; width:100%; cursor:pointer; text-decoration:underline; font-family:inherit; }
+  .message { margin-top:12px; font-size:.9rem; text-align:center; min-height:1.2em; }
+  .message.err { color:#c62828; } .message.ok { color:#1b7f3b; }
+  .aide { color:var(--gris); font-size:.9rem; }
+  .bonjour { text-align:center; color:var(--nuit); font-weight:bold; margin:-10px 0 16px; }
+  .code { font-family:"Courier New",monospace; font-size:1.25rem; letter-spacing:1px; text-align:center; background:var(--clair); border:2px dashed var(--bleu); border-radius:10px; padding:16px 10px; margin:14px 0; user-select:all; word-break:break-all; color:var(--nuit); font-weight:bold; }
+  .avert { background:#fff6e0; border-left:4px solid #b8860b; border-radius:6px; padding:10px 12px; font-size:.88rem; margin:10px 0; }
+</style>
+</head>
+<body>
+<main class="carte" id="carte">
+
+  <!-- CONNEXION -->
+  <section class="vue" id="v-connexion">
+    <div class="logo"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#0a2a66"/><path d="M6 40 Q32 22 58 40 L58 44 Q32 28 6 44 Z" fill="#fff"/><circle cx="32" cy="22" r="7" fill="#1a5fd6" stroke="#fff" stroke-width="2"/></svg><h1>Horizon<span>techland</span></h1><p>Restaurant 5 étoiles de 40 personnes</p></div>
+    <h2 class="petit">Connexion</h2>
+    <p class="message err" id="alerteStockage" hidden></p>
+    <form class="formulaire" id="formConnexion" novalidate>
+      <label for="cId">Identifiant</label>
+      <input type="text" id="cId" autocomplete="username" placeholder="Votre identifiant">
+      <label for="cMdp">Mot de passe</label>
+      <div class="mdp"><input type="password" id="cMdp" autocomplete="current-password" placeholder="Votre mot de passe"><button type="button" class="voir" data-cible="cMdp">Afficher</button></div>
+      <label class="cochet"><input type="checkbox" id="rester" checked> Rester connecté 7 jours (à éviter sur un appareil partagé)</label>
+      <button type="submit" class="btn">Se connecter</button>
+      <p class="message" id="mConnexion" role="alert"></p>
+    </form>
+    <a class="lien" href="#oubli">Mot de passe oublié ?</a>
+    <a class="lien" href="#inscription">Créer un compte</a>
+    <footer>© 2026 Horizontechland</footer>
+  </section>
+
+  <!-- CRÉATION DE COMPTE -->
+  <section class="vue" id="v-inscription" hidden>
+    <div class="logo"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#0a2a66"/><path d="M6 40 Q32 22 58 40 L58 44 Q32 28 6 44 Z" fill="#fff"/><circle cx="32" cy="22" r="7" fill="#1a5fd6" stroke="#fff" stroke-width="2"/></svg><h1>Horizon<span>techland</span></h1><p>Restaurant 5 étoiles de 40 personnes</p></div>
+    <h2 class="petit">Créer un compte</h2>
+    <p class="aide">Mot de passe : 10 caractères minimum, avec au moins 3 types parmi minuscules, majuscules, chiffres et symboles. Un code de récupération vous sera remis une seule fois.</p>
+    <form class="formulaire" id="formInscription" novalidate>
+      <label for="iId">Identifiant</label>
+      <input type="text" id="iId" autocomplete="username" placeholder="Au moins 3 caractères">
+      <label for="iMdp1">Mot de passe</label>
+      <div class="mdp"><input type="password" id="iMdp1" autocomplete="new-password" placeholder="Au moins 10 caractères"><button type="button" class="voir" data-cible="iMdp1">Afficher</button></div>
+      <label for="iMdp2">Confirmer le mot de passe</label>
+      <div class="mdp"><input type="password" id="iMdp2" autocomplete="new-password" placeholder="Répétez le mot de passe"><button type="button" class="voir" data-cible="iMdp2">Afficher</button></div>
+      <button type="submit" class="btn">Créer mon compte</button>
+      <p class="message" id="mInscription" role="alert"></p>
+    </form>
+    <a class="lien" href="#connexion">Retour à la connexion</a>
+    <footer>© 2026 Horizontechland</footer>
+  </section>
+
+  <!-- MOT DE PASSE OUBLIÉ -->
+  <section class="vue" id="v-oubli" hidden>
+    <div class="logo"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#0a2a66"/><path d="M6 40 Q32 22 58 40 L58 44 Q32 28 6 44 Z" fill="#fff"/><circle cx="32" cy="22" r="7" fill="#1a5fd6" stroke="#fff" stroke-width="2"/></svg><h1>Horizon<span>techland</span></h1><p>Restaurant 5 étoiles de 40 personnes</p></div>
+    <h2 class="petit">Mot de passe oublié</h2>
+    <p class="aide">Saisissez votre identifiant, le code de récupération reçu à la création du compte et un nouveau mot de passe.</p>
+    <form class="formulaire" id="formOubli" novalidate>
+      <label for="oId">Identifiant</label>
+      <input type="text" id="oId" autocomplete="username" placeholder="Votre identifiant">
+      <label for="oCode">Code de récupération</label>
+      <input type="text" id="oCode" autocomplete="off" autocapitalize="characters" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX">
+      <label for="oMdp">Nouveau mot de passe</label>
+      <div class="mdp"><input type="password" id="oMdp" autocomplete="new-password" placeholder="Au moins 10 caractères"><button type="button" class="voir" data-cible="oMdp">Afficher</button></div>
+      <button type="submit" class="btn">Changer mon mot de passe</button>
+      <p class="message" id="mOubli" role="alert"></p>
+    </form>
+    <p class="aide">Code perdu ? Sans serveur, il n'existe aucun moyen de le retrouver : il faut effacer les données du site dans le navigateur et recréer le compte.</p>
+    <a class="lien" href="#connexion">Retour à la connexion</a>
+    <footer>© 2026 Horizontechland</footer>
+  </section>
+
+  <!-- CODE DE RÉCUPÉRATION (affiché une seule fois) -->
+  <section class="vue" id="v-code" hidden>
+    <div class="logo"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#0a2a66"/><path d="M6 40 Q32 22 58 40 L58 44 Q32 28 6 44 Z" fill="#fff"/><circle cx="32" cy="22" r="7" fill="#1a5fd6" stroke="#fff" stroke-width="2"/></svg><h1>Horizon<span>techland</span></h1><p>Restaurant 5 étoiles de 40 personnes</p></div>
+    <h2 class="petit">Votre code de récupération</h2>
+    <p class="aide" id="codeTexte"></p>
+    <div class="code" id="codeAffiche"></div>
+    <div class="avert">Notez ce code dans un endroit sûr (gestionnaire de mots de passe ou papier). Il ne sera plus jamais affiché et permet de changer le mot de passe en cas d'oubli.</div>
+    <button type="button" class="btn" id="copier">Copier le code</button>
+    <button type="button" class="btn" id="codeOk" style="margin-top:12px">J'ai noté mon code</button>
+    <p class="message" id="mCode"></p>
+  </section>
+
+  <!-- MENU (après connexion) -->
+  <section class="vue" id="v-accueil" hidden>
+    <div class="logo">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#0a2a66"/><path d="M6 40 Q32 22 58 40 L58 44 Q32 28 6 44 Z" fill="#fff"/><circle cx="32" cy="22" r="7" fill="#1a5fd6" stroke="#fff" stroke-width="2"/></svg>
+      <h1>Horizon<span>techland</span></h1>
+      <p>Restaurant 5 étoiles de 40 personnes</p>
+    </div>
+    <p class="bonjour" id="bonjour"></p>
+    <nav class="menu" aria-label="Rubriques du projet">
+      <a class="titre" href="#collecte"><span class="num">1</span>Collecte des données<span class="fl" aria-hidden="true">›</span></a>
+      <a class="titre" href="#synthese"><span class="num">2</span>Synthèse des données<span class="fl" aria-hidden="true">›</span></a>
+      <a class="titre" href="#couts"><span class="num">3</span>Coûts et délais du projet<span class="fl" aria-hidden="true">›</span></a>
+    </nav>
+    <button type="button" class="lien" id="deco">Se déconnecter</button>
+    <footer>© 2026 Horizontechland</footer>
+  </section>
+
+  <!-- 1. COLLECTE -->
+  <section class="vue" id="v-collecte" hidden>
+    <a class="retour" href="#">← Accueil</a>
+    <h2>1. Collecte des données</h2>
+    <p>Réunir les informations nécessaires à un restaurant haut de gamme : confort, hygiène, sécurité, qualité.</p>
+    <div class="cartes">
+      <div class="c"><b>Capacité</b><span class="grand">40</span> clients simultanés</div>
+      <div class="c"><b>Utilisateurs</b><ul><li>Clients</li><li>Personnel de salle</li><li>Cuisiniers</li><li>Personnel administratif</li><li>Entretien et maintenance</li><li>Fournisseurs</li></ul></div>
+      <div class="c"><b>Principe clé</b>Séparer clairement les flux des clients, du personnel et des marchandises.</div>
+    </div>
+    <h3>Espaces à prévoir</h3>
+    <div class="tab"><table>
+      <thead><tr><th>Espace</th><th>Fonction</th></tr></thead>
+      <tbody>
+        <tr><td>Hall / réception</td><td>Accueil et orientation des clients</td></tr>
+        <tr><td>Salle de restauration</td><td>Accueil de 40 clients</td></tr>
+        <tr><td>Bar</td><td>Préparation et service des boissons</td></tr>
+        <tr><td>Cuisine</td><td>Préparation des repas</td></tr>
+        <tr><td>Plonge</td><td>Lavage de la vaisselle et des ustensiles</td></tr>
+        <tr><td>Réserve sèche</td><td>Stockage des aliments non périssables</td></tr>
+        <tr><td>Chambre froide</td><td>Conservation des produits frais</td></tr>
+        <tr><td>Sanitaires clients</td><td>Hygiène des utilisateurs</td></tr>
+        <tr><td>Bureau</td><td>Gestion administrative</td></tr>
+        <tr><td>Vestiaires du personnel</td><td>Changement et rangement des effets</td></tr>
+        <tr><td>Local technique</td><td>Installations techniques</td></tr>
+        <tr><td>Local déchets</td><td>Gestion des déchets</td></tr>
+        <tr><td>Terrasse extérieure</td><td>Espace complémentaire de restauration</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- 2. SYNTHÈSE : analyse + estimation des surfaces -->
+  <section class="vue" id="v-synthese" hidden>
+    <a class="retour" href="#">← Accueil</a>
+    <h2>2. Synthèse des données : analyse et estimation des surfaces</h2>
+
+    <h3>2.1. Analyse de la capacité</h3>
+    <p>Base de conception : 2 à 2,5 m² par client. On retient 90 à 100 m² pour la salle. En 5 étoiles, confort et intimité passent avant le nombre de tables.</p>
+    <div class="calc">
+      <div class="champs">
+        <label>Clients<input type="number" id="nb" value="40" min="1" max="200"></label>
+        <label>Ratio : <span id="rv">2,5</span> m² / client<input type="range" id="ratio" min="2" max="3" step="0.1" value="2.5"></label>
+      </div>
+      <p class="res">Salle nécessaire : <strong id="salle">100</strong> m² <span id="detail"></span></p>
+    </div>
+
+    <h3>2.2. Analyse fonctionnelle</h3>
+    <div class="chaine"><span class="pas">Entrée</span>›<span class="pas">Réception</span>›<span class="pas">Salle de restauration</span></div>
+    <div class="chaine"><span class="pas p">Livraison</span>›<span class="pas p">Réserve</span>›<span class="pas p">Cuisine</span>›<span class="pas p">Service</span>›<span class="pas">Salle</span></div>
+    <p class="note" style="margin-top:0">Séparer autant que possible les aliments propres, la vaisselle sale, les déchets, le personnel et les clients : accès livraison distinct de l'entrée clients, sortie dédiée aux déchets, vestiaires avant la cuisine.</p>
+
+    <h3>2.3. Exigences d'un restaurant haut de gamme</h3>
+    <div class="cartes">
+      <div class="c"><b>Matériaux et esthétique</b>Matériaux durables en cuisine, finitions nobles en salle, cohérence intérieur et extérieur.</div>
+      <div class="c"><b>Acoustique</b>Absorbants au plafond et aux murs. Objectif indicatif : réverbération d'environ 0,6 à 0,8 s en salle.</div>
+      <div class="c"><b>Éclairage</b>Ambiance variable en salle (environ 100 à 200 lux), environ 500 lux en cuisine.</div>
+      <div class="c"><b>Ventilation et climatisation</b>Air neuf d'environ 25 m³/h par personne (à valider), hotte avec compensation d'air.</div>
+      <div class="c"><b>Mobilier et intimité</b>Espacement confortable entre tables, banquettes ou cloisons légères, chaises ergonomiques.</div>
+      <div class="c"><b>Sanitaires et accessibilité</b>Sanitaires soignés, au moins un accessible PMR, cheminements sans obstacle.</div>
+      <div class="c"><b>Hygiène</b>Marche en avant (HACCP), chambre froide entre 0 et +4 °C, congélation à −18 °C.</div>
+      <div class="c"><b>Sécurité incendie</b>Issues dégagées, désenfumage, détection, cuisine isolée coupe-feu.</div>
+    </div>
+    <p class="note">Valeurs indicatives de pré-dimensionnement : les seuils réglementaires varient selon le pays.</p>
+
+    <h3>3. Estimation des surfaces</h3>
+    <div class="tab"><table>
+      <thead><tr><th>Fonction</th><th class="n">Min (m²)</th><th class="n">Max (m²)</th><th>Part du max</th></tr></thead>
+      <tbody id="surfaces"></tbody>
+      <tfoot><tr><td>Surface intérieure indicative</td><td class="n" id="smin"></td><td class="n" id="smax"></td><td></td></tr></tfoot>
+    </table></div>
+    <p class="note">Hors parking, espaces extérieurs et terrasse éventuelle.</p>
+  </section>
+
+  <!-- 3. COÛTS ET DÉLAIS -->
+  <section class="vue" id="v-couts" hidden>
+    <a class="retour" href="#">← Accueil</a>
+    <h2>3. Coûts et délais du projet</h2>
+    <h3 style="margin-top:0">Coûts</h3>
+    <p>Estimation de pré-dimensionnement, modifiable : le budget se recalcule.</p>
+    <div class="calc"><div class="champs">
+      <label>Surface intérieure (m²)<input type="number" id="surf" value="283" min="50"></label>
+      <label>Travaux par m² (€)<input type="number" id="cm2" value="3000" min="500" step="100"></label>
+      <label>Équipement cuisine (€)<input type="number" id="equip" value="130000" min="0" step="5000"></label>
+      <label>Mobilier, décoration (€)<input type="number" id="mob" value="100000" min="0" step="5000"></label>
+      <label>Honoraires d'études (%)<input type="number" id="hon" value="12" min="0" step="0.5"></label>
+      <label>Contrôle, autorisations (%)<input type="number" id="ctl" value="3" min="0" step="0.5"></label>
+      <label>Aléas (%)<input type="number" id="ale" value="10" min="0" step="1"></label>
+      <label>Préparation de l'ouverture (€)<input type="number" id="ouv" value="60000" min="0" step="5000"></label>
+    </div></div>
+    <div class="tab"><table>
+      <thead><tr><th>Poste</th><th class="n">Montant</th><th class="n">Part</th><th>Répartition</th></tr></thead>
+      <tbody id="budget"></tbody>
+      <tfoot><tr><td>Budget total estimé</td><td class="n" id="total"></td><td class="n">100 %</td><td></td></tr></tfoot>
+    </table></div>
+    <p class="res">Par m² : <strong id="parm2"></strong> · Par place : <strong id="parplace"></strong></p>
+    <p class="note">Hors terrain, parking et terrasse. Les prix varient selon le pays : à valider par des devis.</p>
+
+    <h3>Délais</h3>
+    <div class="calc"><div class="champs"><label>Début du projet<input type="date" id="debut" value="2026-11-01"></label></div>
+      <p class="res">Durée : <strong id="duree"></strong> · Ouverture estimée : <strong id="ouverture"></strong></p></div>
+    <div id="gantt" role="img" aria-label="Planning du projet par phase"></div>
+    <p class="note">Couleur vive : phases du chemin critique. Le permis se prépare pendant la conception et les équipements sont commandés avant la fin des travaux.</p>
+  </section>
+
+</main>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const nombre = x => Math.round(x).toLocaleString('fr-FR');
+  const virg = x => String(x).replace('.', ',');
+
+  // --- Stockage dans le navigateur (avec secours mémoire s'il est bloqué) ---
+  const mem = {};
+  function lire(k, sess) {
+    try { return (sess ? sessionStorage : localStorage).getItem(k); }
+    catch (e) { const v = mem[(sess ? 's:' : 'l:') + k]; return v === undefined ? null : v; }
+  }
+  function ecrire(k, v, sess) {
+    try { (sess ? sessionStorage : localStorage).setItem(k, v); }
+    catch (e) { mem[(sess ? 's:' : 'l:') + k] = v; }
+  }
+  function effacer(k, sess) {
+    try { (sess ? sessionStorage : localStorage).removeItem(k); }
+    catch (e) { delete mem[(sess ? 's:' : 'l:') + k]; }
+  }
+
+  // --- Paramètres de sécurité ---
+  const ITER = 600000;                       // itérations PBKDF2 (ralentit les attaques par essais)
+  const MAX_ESSAIS = 5;                      // essais ratés avant blocage temporaire
+  const INACTIVITE_MS = 15 * 60 * 1000;      // déconnexion après 15 min sans action
+  const SESSION_MS = 8 * 3600 * 1000;        // durée maximale d'une session normale
+  const RESTER_MS = 7 * 24 * 3600 * 1000;    // durée maximale avec « rester connecté »
+  const securise = !!(window.crypto && crypto.subtle && crypto.getRandomValues);
+
+  function alerte(t) { const a = $('alerteStockage'); a.hidden = false; a.textContent = t; }
+  try { localStorage.setItem('htl_test', '1'); localStorage.removeItem('htl_test'); }
+  catch (e) { alerte("Le stockage du navigateur est bloqué ici : le compte sera perdu à la fermeture de la page. Ouvrez le fichier dans votre navigateur pour l'enregistrer durablement."); }
+  if (!securise) {
+    alerte("Ce navigateur ne propose pas le chiffrement nécessaire : la connexion et la création de compte sont désactivées.");
+    document.querySelectorAll('.formulaire .btn').forEach(b => { b.disabled = true; });
+  }
+
+  // --- Chiffrement : jamais de mot de passe en clair, seulement une empreinte PBKDF2-SHA-256 salée ---
+  const hex = buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  const aleaHex = n => hex(crypto.getRandomValues(new Uint8Array(n)));
+  async function hacher(secret, selHex, iter) {
+    const cle = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), 'PBKDF2', false, ['deriveBits']);
+    const sel = new Uint8Array(selHex.match(/../g).map(h => parseInt(h, 16)));
+    return hex(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: sel, iterations: iter }, cle, 256));
+  }
+  function egal(a, b) {                      // comparaison à durée constante
+    if (a.length !== b.length) return false;
+    let r = 0;
+    for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    return r === 0;
+  }
+  function codeRecup() {                     // 20 caractères tirés au hasard = 100 bits
+    const a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const o = crypto.getRandomValues(new Uint8Array(20));
+    let t = '';
+    for (let i = 0; i < 20; i++) { t += a[o[i] % 32]; if (i % 4 === 3 && i < 19) t += '-'; }
+    return t;
+  }
+  const normCode = c => c.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+  // --- Règles du mot de passe ---
+  const COURANTS = ['motdepasse', 'password', '123456789', 'azerty', 'qwerty', '0123456789', 'horizontechland', 'restaurant'];
+  function verifMdp(m, nom) {
+    if (m.length < 10) return 'Le mot de passe doit contenir au moins 10 caractères.';
+    const types = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^A-Za-z0-9]/].filter(r => r.test(m)).length;
+    if (types < 3) return 'Utilisez au moins 3 types de caractères : minuscules, majuscules, chiffres, symboles.';
+    const bas = m.toLowerCase();
+    if (COURANTS.some(x => bas.includes(x)) || bas.includes(nom.toLowerCase())) return 'Mot de passe trop prévisible : évitez les mots courants et votre identifiant.';
+    return '';
+  }
+
+  // --- Comptes ---
+  function comptes() { try { return JSON.parse(lire('htl_comptes') || '{}'); } catch (e) { return {}; } }
+  function sauverComptes(c) { ecrire('htl_comptes', JSON.stringify(c)); }
+
+  // --- Blocage après trop d'essais ratés (délai doublé à chaque échec supplémentaire, 15 min maximum) ---
+  function essais() { try { return JSON.parse(lire('htl_essais') || '{}'); } catch (e) { return {}; } }
+  function bloque(cle) { const e = essais()[cle]; return e && e.jusqua > Date.now() ? Math.ceil((e.jusqua - Date.now()) / 1000) : 0; }
+  function echec(cle) {
+    const t = essais(), e = t[cle] || { n: 0, jusqua: 0 };
+    e.n++;
+    if (e.n >= MAX_ESSAIS) e.jusqua = Date.now() + Math.min(30000 * Math.pow(2, e.n - MAX_ESSAIS), 900000);
+    t[cle] = e; ecrire('htl_essais', JSON.stringify(t));
+  }
+  function reussite(cle) { const t = essais(); delete t[cle]; ecrire('htl_essais', JSON.stringify(t)); }
+  const delai = s => s < 60 ? s + ' s' : Math.ceil(s / 60) + ' min';
+  const cleDe = nom => nom.trim().toLowerCase().slice(0, 64);
+
+  // --- Session : expire seule (inactivité, durée maximale) ---
+  function lireSession() {
+    for (const sess of [false, true]) {
+      const brut = lire('htl_session', sess);
+      if (!brut) continue;
+      try {
+        const x = JSON.parse(brut), now = Date.now();
+        if (x.fin > now && (x.rester || now - x.dernier < INACTIVITE_MS)) return x;
+      } catch (e) { /* session illisible : ignorée */ }
+    }
+    return null;
+  }
+  function fermerSession() { effacer('htl_session', false); effacer('htl_session', true); }
+  function ouvrirSession(cle, rester) {
+    fermerSession();
+    const now = Date.now();
+    ecrire('htl_session', JSON.stringify({ cle: cle, rester: rester, fin: now + (rester ? RESTER_MS : SESSION_MS), dernier: now }), !rester);
+  }
+  function utilisateur() { const x = lireSession(); return x ? (comptes()[x.cle] || null) : null; }
+  let dernierTouch = 0;
+  function activite() {
+    const now = Date.now();
+    if (now - dernierTouch < 30000) return;
+    dernierTouch = now;
+    const x = lireSession();
+    if (x && !x.rester) { x.dernier = now; ecrire('htl_session', JSON.stringify(x), true); }
+  }
+  ['click', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, activite, { passive: true }));
+
+  // --- Navigation : accès aux rubriques réservé aux personnes connectées ---
+  const publiques = ['connexion', 'inscription', 'oubli'];
+  const protegees = ['collecte', 'synthese', 'couts'];
+  let vueForcee = null, etaitConnecte = false;
+  function aller() {
+    const u = utilisateur();
+    let v = vueForcee || location.hash.slice(1);
+    if (!vueForcee) {
+      if (u) { if (!protegees.includes(v)) v = 'accueil'; }
+      else if (!publiques.includes(v)) v = 'connexion';
+    }
+    if (u) etaitConnecte = true;
+    else if (etaitConnecte) { etaitConnecte = false; afficher($('mConnexion'), 'Session expirée : reconnectez-vous.', 'ok'); }
+    document.querySelectorAll('.vue').forEach(s => { s.hidden = s.id !== 'v-' + v; });
+    $('carte').classList.toggle('large', protegees.includes(v));
+    if (u) $('bonjour').textContent = 'Bonjour, ' + u.nom;
+    window.scrollTo(0, 0);
+  }
+  function versAccueil() { if (location.hash) location.hash = ''; else aller(); }
+  window.addEventListener('hashchange', aller);
+  setInterval(() => { if (etaitConnecte && !utilisateur()) aller(); }, 15000);
+
+  function afficher(el, texte, type) { el.textContent = texte; el.className = 'message ' + type; }
+  function montrerCode(code, texte) {
+    $('codeAffiche').textContent = code; $('codeTexte').textContent = texte; $('mCode').textContent = '';
+    vueForcee = 'code'; aller();
+  }
+
+  document.querySelectorAll('.voir').forEach(b => b.addEventListener('click', () => {
+    const i = $(b.dataset.cible), visible = i.type === 'text';
+    i.type = visible ? 'password' : 'text';
+    b.textContent = visible ? 'Afficher' : 'Masquer';
+  }));
+
+  // --- Connexion ---
+  $('formConnexion').addEventListener('submit', async e => {
+    e.preventDefault();
+    const nom = $('cId').value.trim(), mdp = $('cMdp').value, msg = $('mConnexion');
+    if (!securise) return;
+    if (!nom || !mdp) { afficher(msg, 'Renseignez votre identifiant et votre mot de passe.', 'err'); return; }
+    const cle = cleDe(nom), att = bloque(cle);
+    if (att) { afficher(msg, 'Trop de tentatives. Réessayez dans ' + delai(att) + '.', 'err'); return; }
+    const c = comptes()[cle];
+    // Même travail de calcul si le compte n'existe pas : on ne révèle pas quels identifiants existent.
+    const ok = c ? egal(await hacher(mdp, c.sel, c.iter), c.hash) : (await hacher(mdp, aleaHex(16), ITER), false);
+    if (!ok) { echec(cle); afficher(msg, 'Identifiant ou mot de passe incorrect.', 'err'); return; }
+    reussite(cle); ouvrirSession(cle, $('rester').checked);
+    $('cMdp').value = ''; msg.textContent = '';
+    versAccueil();
+  });
+
+  // --- Création de compte ---
+  $('formInscription').addEventListener('submit', async e => {
+    e.preventDefault();
+    const nom = $('iId').value.trim(), m1 = $('iMdp1').value, m2 = $('iMdp2').value, msg = $('mInscription');
+    if (!securise) return;
+    const tous = comptes(), cle = cleDe(nom);
+    if (nom.length < 3) { afficher(msg, "L'identifiant doit contenir au moins 3 caractères.", 'err'); return; }
+    const err = verifMdp(m1, nom);
+    if (err) { afficher(msg, err, 'err'); return; }
+    if (m1 !== m2) { afficher(msg, 'Les deux mots de passe sont différents.', 'err'); return; }
+    if (tous[cle]) { afficher(msg, 'Cet identifiant existe déjà. Choisissez-en un autre.', 'err'); return; }
+    const sel = aleaHex(16), selR = aleaHex(16), code = codeRecup();
+    tous[cle] = { nom: nom, sel: sel, iter: ITER, hash: await hacher(m1, sel, ITER), recup: { sel: selR, hash: await hacher(normCode(code), selR, ITER) } };
+    sauverComptes(tous);
+    $('formInscription').reset(); msg.textContent = '';
+    $('cId').value = nom;
+    montrerCode(code, 'Compte créé. Voici votre code de récupération, affiché une seule fois.');
+  });
+
+  // --- Mot de passe oublié : identifiant + code de récupération ---
+  $('formOubli').addEventListener('submit', async e => {
+    e.preventDefault();
+    const nom = $('oId').value.trim(), code = normCode($('oCode').value), nouveau = $('oMdp').value, msg = $('mOubli');
+    if (!securise) return;
+    if (!nom || !code || !nouveau) { afficher(msg, 'Renseignez les trois champs.', 'err'); return; }
+    const cle = cleDe(nom), att = bloque(cle);
+    if (att) { afficher(msg, 'Trop de tentatives. Réessayez dans ' + delai(att) + '.', 'err'); return; }
+    const tous = comptes(), c = tous[cle];
+    const ok = c ? egal(await hacher(code, c.recup.sel, ITER), c.recup.hash) : (await hacher(code, aleaHex(16), ITER), false);
+    if (!ok) { echec(cle); afficher(msg, 'Identifiant ou code de récupération incorrect.', 'err'); return; }
+    const err = verifMdp(nouveau, c.nom);
+    if (err) { afficher(msg, err, 'err'); return; }
+    const sel = aleaHex(16), selR = aleaHex(16), nouveauCode = codeRecup();
+    c.sel = sel; c.iter = ITER; c.hash = await hacher(nouveau, sel, ITER);
+    c.recup = { sel: selR, hash: await hacher(normCode(nouveauCode), selR, ITER) };
+    sauverComptes(tous); reussite(cle); fermerSession();
+    $('formOubli').reset(); msg.textContent = '';
+    montrerCode(nouveauCode, 'Mot de passe modifié. L\'ancien code est annulé : voici votre nouveau code de récupération.');
+  });
+
+  $('copier').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText($('codeAffiche').textContent); afficher($('mCode'), 'Code copié.', 'ok'); }
+    catch (e) { afficher($('mCode'), 'Copie impossible ici : sélectionnez le code et copiez-le à la main.', 'err'); }
+  });
+  $('codeOk').addEventListener('click', () => {
+    $('codeAffiche').textContent = ''; vueForcee = null;
+    afficher($('mConnexion'), 'Vous pouvez maintenant vous connecter.', 'ok');
+    location.hash = 'connexion'; aller();
+  });
+
+  $('deco').addEventListener('click', () => { etaitConnecte = false; fermerSession(); location.hash = 'connexion'; aller(); });
+
+  aller();
+
+  // --- Calculateur de capacité ---
+  function capacite() {
+    const n = Math.max(1, parseInt($('nb').value, 10) || 1);
+    const r = parseFloat($('ratio').value);
+    $('rv').textContent = virg(r.toFixed(1));
+    $('salle').textContent = virg(Math.round(n * r * 10) / 10);
+    $('detail').textContent = '(' + n + ' × ' + virg(r.toFixed(1)) + ')';
+  }
+  $('nb').addEventListener('input', capacite);
+  $('ratio').addEventListener('input', capacite);
+  capacite();
+
+  // --- Surfaces ---
+  const surfaces = [
+    ['Salle de restauration – 40 personnes', 90, 100], ['Hall / réception', 15, 20], ['Bar', 15, 20],
+    ['Cuisine', 35, 45], ['Réserves + chambres froides', 15, 20], ['Plonge', 8, 12],
+    ['Sanitaires clients', 15, 20], ['Bureau', 8, 12], ['Vestiaires / personnel', 10, 15],
+    ['Local déchets / technique', 8, 12], ['Circulations et dégagements', 30, 40]
+  ];
+  const smin = surfaces.reduce((s, l) => s + l[1], 0);
+  const smax = surfaces.reduce((s, l) => s + l[2], 0);
+  $('surfaces').innerHTML = surfaces.map(l => {
+    const p = Math.round(l[2] / smax * 100);
+    return `<tr><td>${l[0]}</td><td class="n">${l[1]}</td><td class="n">${l[2]}</td><td><div class="barre"><i style="width:${p}%"></i></div></td></tr>`;
+  }).join('');
+  $('smin').textContent = '≈ ' + smin;
+  $('smax').textContent = '≈ ' + smax;
+
+  // --- Budget ---
+  const ids = ['surf', 'cm2', 'equip', 'mob', 'hon', 'ctl', 'ale', 'ouv'];
+  const val = id => Math.max(0, parseFloat($(id).value) || 0);
+  function budget() {
+    const travaux = val('surf') * val('cm2');
+    const hon = travaux * val('hon') / 100, ctl = travaux * val('ctl') / 100;
+    const ale = (travaux + val('equip') + val('mob') + hon + ctl) * val('ale') / 100;
+    const lignes = [
+      ['Travaux (structure, second œuvre, lots techniques)', travaux],
+      ['Équipement cuisine, plonge, chambres froides', val('equip')],
+      ['Mobilier, vaisselle, décoration', val('mob')],
+      ["Honoraires d'études", hon],
+      ['Contrôle, autorisations, assurances', ctl],
+      ['Aléas', ale],
+      ["Préparation de l'ouverture", val('ouv')]
+    ];
+    const total = lignes.reduce((s, l) => s + l[1], 0);
+    $('budget').innerHTML = lignes.map(l => {
+      const p = total ? l[1] / total * 100 : 0;
+      return `<tr><td>${l[0]}</td><td class="n">${nombre(l[1])} €</td><td class="n">${virg(p.toFixed(1))} %</td><td><div class="barre"><i style="width:${p}%"></i></div></td></tr>`;
+    }).join('');
+    $('total').textContent = nombre(total) + ' €';
+    $('parm2').textContent = val('surf') ? nombre(total / val('surf')) + ' €' : '–';
+    $('parplace').textContent = nombre(total / 40) + ' €';
+  }
+  ids.forEach(id => $(id).addEventListener('input', budget));
+  budget();
+
+  // --- Délais (début et durée en mois) ---
+  const phases = [
+    ['Programme et études préliminaires', 0, 2, 1], ['Conception', 2, 3, 1],
+    ['Permis et autorisations', 4, 3, 0], ['Consultation des entreprises', 6, 2, 1],
+    ['Travaux', 8, 9, 1], ['Équipements cuisine et mobilier', 15, 3, 0],
+    ['Essais, réception, formation', 18, 1.5, 1]
+  ];
+  const fin = Math.max(...phases.map(p => p[1] + p[2]));
+  $('gantt').innerHTML = phases.map(p =>
+    `<div class="gl"><div>${p[0]}<small>${virg(p[2])} mois</small></div><div class="piste"><i class="${p[3] ? 'k' : ''}" style="left:${p[1] / fin * 100}%;width:${p[2] / fin * 100}%"></i></div></div>`
+  ).join('');
+  $('duree').textContent = virg(fin) + ' mois';
+  function ouverture() {
+    const v = $('debut').value;
+    if (!v) { $('ouverture').textContent = '–'; return; }
+    const d = new Date(v + 'T00:00:00');
+    d.setDate(d.getDate() + Math.round(fin * 30.4));
+    $('ouverture').textContent = d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  }
+  $('debut').addEventListener('input', ouverture);
+  ouverture();
+</script>
+</body>
+</html>
